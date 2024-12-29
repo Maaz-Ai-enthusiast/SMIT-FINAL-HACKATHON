@@ -1,4 +1,5 @@
-
+import { Link ,NavLink} from "react-router-dom";
+import AppFeatures from "./AppFeatures";
 import Button from "./Button";
 
 const HeroSection = () => {
@@ -12,14 +13,21 @@ const HeroSection = () => {
       </p>
 
       <div className="flex justify-center gap-6 mb-6 flex-wrap">
+       
+       
+        <Link to="/signup">
         <Button
-          className="bg-soft-yellow text-black hover:bg-vibrant-orange transition-all duration-300 px-6 py-3 text-xl sm:text-lg"
+          className="bg-soft-yellow text-black transition-all duration-300 px-6 py-3 text-xl sm:text-lg"
           title="Get Started"
         />
-        <Button
+        </Link>
+        
+      <NavLink to="/features" >
+      <Button
           className="bg-transparent border-2 border-soft-yellow text-soft-yellow hover:bg-soft-yellow hover:text-black transition-all duration-300 px-6 py-3 text-xl sm:text-lg"
           title="Learn More"
         />
+      </NavLink>
       </div>
 
       <p className="text-sm sm:text-base text-cool-gray">

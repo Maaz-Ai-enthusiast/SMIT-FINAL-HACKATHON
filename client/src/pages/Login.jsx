@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import Cookies from 'js-cookie';  // Import js-cookie to manage cookies
 
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,9 +19,33 @@ function Login() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:5000/users/login', { // Replace with your backend URL
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the token in a cookie (non-`httpOnly` cookie, for the sake of this example)
+        Cookies.set('token', data.token, { expires: 7, path: '' });
+
+        // Navigate to home or dashboard page after successful login
+        navigate('/');
+      } else {
+        setError(data.error || 'An error occurred');
+      }
+    } catch (err) {
+      setError('Network error, please try again.' + err.message);
+    }
   };
 
   return (
@@ -53,6 +80,8 @@ function Login() {
               required
             />
           </div>
+
+          {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
 
           <div className="mb-6">
             <Button

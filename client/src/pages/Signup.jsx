@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Button from '../components/Button';
+import Cookies from 'js-cookie';  // Import js-cookie to manage cookies
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -36,12 +37,18 @@ function SignUp() {
 
     try {
       const response = await axios.post('http://localhost:5000/users/signup', formData);
+
       setSuccessMessage(response.data.message);
       notifySuccess(response.data.message); // Show success toast
 
+      // Store the token in a cookie (non-`httpOnly` cookie, for the sake of this example)
+      Cookies.set('token', response.data.token, { expires: 7, path: '' });
+
+      // Redirect to login after 2 seconds
       setTimeout(() => {
         navigate('/login');
-      }, 2000); // Redirect to login after 2 seconds
+      }, 2000); 
+
     } catch (error) {
       const message = error.response?.data?.error || 'Something went wrong!';
       setErrorMessage(message);

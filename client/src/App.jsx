@@ -6,6 +6,9 @@ import Navbar from './components/Navbar';
 import SignUp from './pages/Signup';
 import Login from './pages/Login';
 import Footer from './components/Footer';
+import AppFeatures from './components/AppFeatures';
+import EventForm from './components/EventForm';
+import Events from './pages/Events';
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/features" element={<AppFeatures />} />
+        <Route path='/createEvent' element={<EventForm/>} />
+        <Route path ="/events" element={<Events />} />
       </Routes>
       <Footer />
       <ToastContainer /> {/* Add ToastContainer */}

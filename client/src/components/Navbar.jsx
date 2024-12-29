@@ -1,14 +1,37 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import Button from './Button'; // Import the Button component
+import axios from 'axios';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate(); // React Router hook for navigation
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  const logout = async () => {
+    try {
+      // Call the backend API to log out, ensuring cookies are sent
+      const response = await axios.post('http://localhost:5000/users/logout', {}, { withCredentials: true });
+  
+      if (response.data.success) {
+        console.log("Logout successful");
+        // Optionally, you could manually clear the token from cookies (if needed)
+        document.cookie = "token=; Max-Age=0; path=/";  // Manually clearing token cookie
+        navigate('/signup');  // Navigate to signup page after successful logout
+      } else {
+        console.error("Logout failed", response.data.message);
+      }
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
+  
+  
+  
 
   return (
     <>
@@ -26,8 +49,7 @@ function Navbar() {
             <div className="flex items-center gap-4 lg:gap-6 text-deep-blue text-xs md:text-sm lg:text-base whitespace-nowrap">
               <Link to="/">Home</Link>
               <Link to="/events">Events</Link>
-              <Link to="/create">Create Event</Link>
-              <Link to="/profile">Profile</Link>
+              <Link to="/createEvent">Create Event</Link>
             </div>
 
             <div className="flex items-center gap-3 lg:gap-5">
@@ -42,6 +64,15 @@ function Navbar() {
                   className="text-deep-blue px-3 py-1 md:px-4 md:py-2 lg:px-5 lg:py-3 text-xs md:text-sm lg:text-base rounded-full border border-deep-blue whitespace-nowrap"
                   title="Sign Up"
                 />
+              </Link>
+              {/* Logout Button */}
+              <Link to="/signup">
+              <button
+                onClick={logout}
+                className="text-deep-blue text-xs md:text-sm lg:text-base whitespace-nowrap"
+              >
+                Logout
+              </button>
               </Link>
             </div>
           </div>
@@ -76,11 +107,8 @@ function Navbar() {
           <Link to="/events" onClick={toggleMenu}>
             Events
           </Link>
-          <Link to="/create" onClick={toggleMenu}>
+          <Link to="/createEvente" onClick={toggleMenu}>
             Create Event
-          </Link>
-          <Link to="/profile" onClick={toggleMenu}>
-            Profile
           </Link>
         </div>
         <div className="flex flex-col gap-3 mt-5">
@@ -96,6 +124,15 @@ function Navbar() {
               title="Sign Up"
             />
           </Link>
+          {/* Logout Button */}
+        <Link to="/signup" onClick={toggleMenu}>
+        <button
+            onClick={logout}
+            className="text-deep-blue px-4 py-2 rounded-full border border-deep-blue w-full"
+          >
+            Logout
+          </button>
+        </Link>
         </div>
       </div>
     </>
