@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 import AppFeatures from './components/AppFeatures';
 import EventForm from './components/EventForm';
 import Events from './pages/Events';
+import ContactUs from './pages/Contactup';
+
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
         <Route path="/features" element={<AppFeatures />} />
         <Route path='/createEvent' element={<EventForm/>} />
         <Route path ="/events" element={<Events />} />
+        <Route path='/contact' element={<ContactUs />} />
       </Routes>
       <Footer />
       <ToastContainer /> {/* Add ToastContainer */}

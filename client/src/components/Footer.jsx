@@ -8,14 +8,13 @@ function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Logo Section */}
           <div className="flex flex-col items-center sm:items-start text-[#283593]">
-  <Link to="/" className="text-3xl font-semibold text-deep-blue mb-4">
-    Connectify
-  </Link>
-  <p className="text-sm text-deep-blue text-center sm:text-left">
-    Your go-to platform for managing events, connecting with others, and staying up-to-date with exciting opportunities.
-  </p>
-</div>
-
+            <Link to="/" className="text-3xl font-semibold text-deep-blue mb-4">
+              Connectify
+            </Link>
+            <p className="text-sm text-deep-blue text-center sm:text-left">
+              Your go-to platform for managing events, connecting with others, and staying up-to-date with exciting opportunities.
+            </p>
+          </div>
 
           {/* Quick Links Section */}
           <div className="flex flex-col items-center sm:items-start">
@@ -32,15 +31,11 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/create" className="text-[#283593] hover:text-black text-sm">
+                <Link to="/createEvent" className="text-[#283593] hover:text-black text-sm">
                   Create Event
                 </Link>
               </li>
-              <li>
-                <Link to="/profile" className="text-[#283593] hover:text-black text-sm">
-                  Profile
-                </Link>
-              </li>
+            
               <li>
                 <Link to="/contact" className="text-[#283593] hover:text-black text-sm">
                   Contact Us

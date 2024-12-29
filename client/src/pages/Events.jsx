@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import Loader from "./../components/Loader"; // Import the Loader component
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 function Events() {
   const [events, setEvents] = useState([]);
@@ -12,32 +14,32 @@ function Events() {
     date: "All",
   });
 
+  const navigate = useNavigate(); // Initialize useNavigate
+
   useEffect(() => {
-    // Fetch events when the component mounts
     const fetchEvents = async () => {
       try {
-        const token = Cookies.get("token"); // Get token from the cookie
+        const token = Cookies.get("token");  // Get the token from cookies
+        console.log("Token:", token); // Log the token to check it
+        
         if (!token) {
           setError("You must be logged in to view events.");
           setLoading(false);
           return;
         }
 
-        console.log("Token:", token); // Log token for debugging
-
-        const response = await axios.post("http://localhost:5000/events/getUserEvents", {
-          token, // Send token in the body
-        });
+        const response = await axios.post(
+          "http://localhost:5000/events/getUserEvents", 
+          { token } // Send token in the request body
+        );
 
         if (response.status === 200) {
-          console.log("Fetched events:", response.data.events); // Log fetched events
           setEvents(response.data.events);
-          setFilteredEvents(response.data.events); // Initially show all events
+          setFilteredEvents(response.data.events);
         } else {
           setError("Error fetching events. Please try again later.");
         }
       } catch (err) {
-        // Log the error details for better debugging
         console.error("Error fetching events:", err.response ? err.response.data : err.message);
         setError("Error fetching events. Please try again later.");
       } finally {
@@ -48,22 +50,15 @@ function Events() {
     fetchEvents();
   }, []);
 
-  // Filter events based on the selected filters
   useEffect(() => {
     let filtered = events;
 
-    // Log event visibility to see if it matches expectations
-    console.log("Filtering events:", events);
-
-    // Filter by visibility
     if (filter.visibility !== "All") {
-      console.log("Filtering by visibility:", filter.visibility);
       filtered = filtered.filter(event =>
-        event.visibility && event.visibility.toLowerCase().trim() === filter.visibility.toLowerCase().trim()
+        event.visibility.toLowerCase().trim() === filter.visibility.toLowerCase().trim()
       );
     }
 
-    // Filter by date (upcoming vs past)
     if (filter.date !== "All") {
       const now = new Date();
       filtered = filtered.filter(event => {
@@ -75,21 +70,12 @@ function Events() {
     setFilteredEvents(filtered);
   }, [filter, events]);
 
-  // Handle filter changes
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilter((prevFilter) => ({
-      ...prevFilter,
-      [name]: value,
-    }));
+  const handleFilterClick = (type, value) => {
+    setFilter(prev => ({ ...prev, [type]: value }));
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="spinner-border animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
@@ -106,41 +92,61 @@ function Events() {
       <h1 className="text-3xl font-bold mb-6 text-center">Your Events</h1>
       
       {/* Filter Controls */}
-      <div className="flex justify-between mb-6">
-        <div className="flex space-x-4">
-          <div>
-            <label htmlFor="visibility" className="block text-gray-700">Visibility</label>
-            <select
-              id="visibility"
-              name="visibility"
-              value={filter.visibility}
-              onChange={handleFilterChange}
-              className="p-2 border rounded"
-            >
-              <option value="All">All</option>
-              <option value="Public">Public</option>
-              <option value="Private">Private</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="date" className="block text-gray-700">Event Date</label>
-            <select
-              id="date"
-              name="date"
-              value={filter.date}
-              onChange={handleFilterChange}
-              className="p-2 border rounded"
-            >
-              <option value="All">All</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="Past">Past</option>
-            </select>
-          </div>
+      <div className="mb-6">
+        <div className="flex space-x-4 justify-center mb-4">
+          <button
+            onClick={() => handleFilterClick("visibility", "All")}
+            className={`px-4 py-2 rounded ${filter.visibility === "All" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => handleFilterClick("visibility", "Public")}
+            className={`px-4 py-2 rounded ${filter.visibility === "Public" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Public
+          </button>
+          <button
+            onClick={() => handleFilterClick("visibility", "Private")}
+            className={`px-4 py-2 rounded ${filter.visibility === "Private" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Private
+          </button>
+        </div>
+
+        <div className="flex space-x-4 justify-center">
+          <button
+            onClick={() => handleFilterClick("date", "All")}
+            className={`px-4 py-2 rounded ${filter.date === "All" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            All Dates
+          </button>
+          <button
+            onClick={() => handleFilterClick("date", "Upcoming")}
+            className={`px-4 py-2 rounded ${filter.date === "Upcoming" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Upcoming
+          </button>
+          <button
+            onClick={() => handleFilterClick("date", "Past")}
+            className={`px-4 py-2 rounded ${filter.date === "Past" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Past
+          </button>
         </div>
       </div>
 
       {filteredEvents.length === 0 ? (
-        <p className="text-center text-gray-500">No events found.</p>
+        <div className="text-center p-8">
+          <h2 className="text-xl font-semibold text-gray-600">No Events Created Yet</h2>
+          <p className="text-gray-500 mb-4">It looks like you haven't created any events yet. Start by creating your first event!</p>
+          <button
+            onClick={() => navigate("/create-event")}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+          >
+            Create Event
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredEvents.map((event) => (

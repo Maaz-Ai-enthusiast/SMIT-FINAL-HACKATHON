@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
-import Cookies from 'js-cookie';  // Import js-cookie to manage cookies
+import Loader from './../components/Loader'; 
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ function Login() {
     password: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,29 +25,54 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true); // Set loading state
 
     try {
-      const response = await fetch('http://localhost:5000/users/login', { // Replace with your backend URL
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // const response = await fetch(`${import.meta.env.VITE_API_URL}/users/login`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(formData),
+      // });
 
-      const data = await response.json();
+      const response = await axios.post('http://localhost:5000/users/logout', {}, { withCredentials: true });
 
-      if (response.ok) {
-        // Store the token in a cookie (non-`httpOnly` cookie, for the sake of this example)
-        Cookies.set('token', data.token, { expires: 7, path: '' });
 
-        // Navigate to home or dashboard page after successful login
+      if (!response.ok) {
+        // Attempt to parse the error if response is not OK
+        const errorData = await response.json();
+        setError(errorData.error || 'Invalid email or password');
+        return;
+      }
+
+      // Handle successful response
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (err) {
+        setError('Error parsing response data');
+        return;
+      }
+
+      if (data.success) {
+        // Store the token securely in cookies
+        Cookies.set('token', data.token, {
+          expires: 7,
+          path: '',
+          secure: true, // Use secure in production
+          sameSite: 'Strict', // CSRF protection
+        });
+
+        // Navigate to the dashboard or intended page
         navigate('/');
       } else {
-        setError(data.error || 'An error occurred');
+        setError(data.error || 'Login failed. Please try again.');
       }
     } catch (err) {
-      setError('Network error, please try again.' + err.message);
+      setError(`Network error: ${err.message}`);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -84,11 +112,15 @@ function Login() {
           {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
 
           <div className="mb-6">
-            <Button
-              type="submit"
-              className="bg-deep-blue text-white w-full py-3 rounded-full text-lg"
-              title="Log In"
-            />
+            {loading ? (
+              <Loader /> // Use your existing Loader component here
+            ) : (
+              <Button
+                type="submit"
+                className="w-full py-3 rounded-full text-lg bg-deep-blue text-white"
+                title="Log In"
+              />
+            )}
           </div>
         </form>
 
