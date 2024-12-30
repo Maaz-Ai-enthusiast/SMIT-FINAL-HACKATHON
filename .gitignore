@@ -1,2 +1,5 @@
 /client/node_modules/
 /server/node_modules/
+# also add .env file from server folder and client folder
+/client/.env
+/server/.env

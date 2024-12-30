@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
-import Loader from './../components/Loader'; 
-import Cookies from 'js-cookie';
+import Loader from './../components/Loader';
 import axios from 'axios';
 
 function Login() {
@@ -11,7 +10,7 @@ function Login() {
     password: '',
   });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,54 +24,25 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true); // Set loading state
+    setLoading(true);
 
     try {
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/users/login`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(formData),
-      // });
+      const response = await axios.post(
+        'http://localhost:5000/api/users/login', // Corrected endpoint
+        formData,
+        { withCredentials: true } // Include credentials for cookies
+      );
 
-      const response = await axios.post('http://localhost:5000/users/logout', {}, { withCredentials: true });
-
-
-      if (!response.ok) {
-        // Attempt to parse the error if response is not OK
-        const errorData = await response.json();
-        setError(errorData.error || 'Invalid email or password');
-        return;
-      }
-
-      // Handle successful response
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (err) {
-        setError('Error parsing response data');
-        return;
-      }
-
+      const data = response.data; // Axios automatically parses JSON
       if (data.success) {
-        // Store the token securely in cookies
-        Cookies.set('token', data.token, {
-          expires: 7,
-          path: '',
-          secure: true, // Use secure in production
-          sameSite: 'Strict', // CSRF protection
-        });
-
-        // Navigate to the dashboard or intended page
-        navigate('/');
+        navigate('/'); // Redirect on successful login
       } else {
         setError(data.error || 'Login failed. Please try again.');
       }
     } catch (err) {
-      setError(`Network error: ${err.message}`);
+      setError(`Network error: ${err.response?.data?.error || err.message}`);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
@@ -94,7 +64,6 @@ function Login() {
               required
             />
           </div>
-
           <div className="mb-4">
             <label htmlFor="password" className="block text-deep-blue text-sm mb-2">Password</label>
             <input
@@ -108,12 +77,10 @@ function Login() {
               required
             />
           </div>
-
           {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
-
           <div className="mb-6">
             {loading ? (
-              <Loader /> // Use your existing Loader component here
+              <Loader /> // Your Loader component
             ) : (
               <Button
                 type="submit"
@@ -123,7 +90,6 @@ function Login() {
             )}
           </div>
         </form>
-
         <div className="text-center">
           <p className="text-sm">
             Don't have an account?{' '}
